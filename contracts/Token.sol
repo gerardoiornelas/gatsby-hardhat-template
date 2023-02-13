@@ -1,11 +1,9 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
 contract Token {
-    string public name;
-    string public symbol;
+    string public name = "Gerardo I. Ornelas Token";
+    string public symbol = "GIO";
     uint256 public decimals = 18;
     uint256 public totalSupply;
 
@@ -36,18 +34,14 @@ contract Token {
         uint256 _value
     ) public returns (bool success) {
         require(balanceOf[msg.sender] >= _value);
-
         _transfer(msg.sender, _to, _value);
-
         return true;
     }
 
     function _transfer(address _from, address _to, uint256 _value) internal {
         require(_to != address(0));
-
         balanceOf[_from] = balanceOf[_from] - _value;
         balanceOf[_to] = balanceOf[_to] + _value;
-
         emit Transfer(_from, _to, _value);
     }
 
@@ -56,9 +50,7 @@ contract Token {
         uint256 _value
     ) public returns (bool success) {
         require(_spender != address(0));
-
         allowance[msg.sender][_spender] = _value;
-
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
@@ -68,13 +60,13 @@ contract Token {
         address _to,
         uint256 _value
     ) public returns (bool success) {
+        // Check approval
         require(_value <= balanceOf[_from]);
         require(_value <= allowance[_from][msg.sender]);
 
         allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
 
         _transfer(_from, _to, _value);
-
         return true;
     }
 }

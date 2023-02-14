@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import axios from "axios"
-import { NFTStorage, File } from "nft.storage"
-import { Buffer } from "buffer"
+import _ from "lodash"
 import { ethers } from "ethers"
-import { Box, Typography, Container } from "@mui/material"
+import {
+  Box,
+  Typography,
+  Container,
+  CircularProgress,
+  Divider,
+} from "@mui/material"
 
 import { UIShell } from "../UIShell"
-import { Title } from "../Title"
+import { Info } from "../Info"
+import { TokensSoldProgress } from "../TokensSoldProgress"
+import { BuyTokens } from "../BuyTokens"
 
 import {
   loadAccount,
@@ -31,16 +36,18 @@ const Home = ({ children }: Props) => {
   const [network, setNetwork] = useState(null)
   // const [provider, setProvider] = useState(null)
 
-  let provider = null
-  let chainId = null
-
-  const dispatch = useDispatch()
+  const [price, setPrice] = useState(0)
+  const [maxTokens, setMaxTokens] = useState(0)
+  const [tokensSold, setTokensSold] = useState(0)
 
   const [isLoading, setIsLoading] = useState(true)
 
+  const network = process.env.NODE_ENV === "production" ? goerli : hardhat
+
   const loadBlockchainData = async () => {
     // Initiate provider
-    const provider = loadProvider(dispatch)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    setProvider(provider)
 
     const chainId = await loadNetwork(provider, dispatch)
 
@@ -52,20 +59,60 @@ const Home = ({ children }: Props) => {
   }
 
   useEffect(() => {
-    loadBlockchainData()
-  }, [])
+    if (isLoading) {
+      loadBlockchainData()
+    }
+  }, [isLoading])
 
   return (
-    <UIShell variant="default">
+    <UIShell>
       <Container>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          sx={{
-            backgroundColor: "#fafafa",
-          }}
-        ></Box>
-        <Box></Box>
+        <Box>
+          <Container>
+            <Box my={4}>
+              <Typography variant="h3" align="center">
+                Introducing GIO Token!
+              </Typography>
+            </Box>
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <Box
+                display="flex"
+                justifyContent="center"
+                flexDirection="column"
+              >
+                <Box display="flex" justifyContent={`center`}>
+                  <Typography>
+                    <strong>Current Price: </strong>
+                    {` ${price} ETH`}
+                  </Typography>
+                </Box>
+                <Box my={4}>
+                  <BuyTokens
+                    provider={provider}
+                    price={price}
+                    crowdsale={crowdsale}
+                    loadBlockchainData={loadBlockchainData}
+                  />
+                </Box>
+                <TokensSoldProgress
+                  tokensSold={tokensSold}
+                  maxTokens={maxTokens}
+                />
+              </Box>
+            )}
+
+            <Box my={2}>
+              <Divider />
+            </Box>
+            <Box>
+              {account && (
+                <Info account={account} accountBalance={accountBalance} />
+              )}
+            </Box>
+          </Container>
+        </Box>
       </Container>
     </UIShell>
   )

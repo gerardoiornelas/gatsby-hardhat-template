@@ -17,7 +17,7 @@ import {
 } from "../../store/interactions/blockchainProvider.interactions"
 
 import nftAbi from "../../abis/NFT.json"
-import { networkConfig } from "../../networkConfig"
+import { goerli, hardhat } from "../../networkConfig"
 
 import { StyledHome } from "./Home.styled"
 
@@ -25,7 +25,8 @@ interface Props {
   children: React.ReactNode
 }
 
-const AiNftMinter = ({ children }: Props) => {
+const Home = ({ children }: Props) => {
+  const networkConfig = process.env.NODE_ENV === "production" ? goerli : hardhat
   const [balance, setBalance] = useState(0)
   const [network, setNetwork] = useState(null)
   // const [provider, setProvider] = useState(null)
@@ -47,12 +48,7 @@ const AiNftMinter = ({ children }: Props) => {
     const account = await loadAccount(dispatch)
 
     //load nft
-    await loadNft(
-      "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      nftAbi,
-      provider,
-      dispatch
-    )
+    await loadNft(networkConfig.nft.address, nftAbi, provider, dispatch)
   }
 
   useEffect(() => {
@@ -75,4 +71,4 @@ const AiNftMinter = ({ children }: Props) => {
   )
 }
 
-export default AiNftMinter
+export default Home
